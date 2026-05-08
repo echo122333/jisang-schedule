@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>지상이의 채용 일정</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#ffffff;--bg2:#f5f5f4;--bg3:#eeede9;
+    --text:#1a1a1a;--text2:#6b7280;--text3:#9ca3af;
+    --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.2);
+    --radius:8px;--radius-lg:12px;
+    --font:'Pretendard','Apple SD Gothic Neo','Noto Sans KR',system-ui,sans-serif;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;
+      --text:#f2f2f7;--text2:#aeaeb2;--text3:#636366;
+      --border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.22);
+    }
+  }
+  body{background:var(--bg3);color:var(--text);font-family:var(--font);min-height:100vh;padding:0}
+  .container{max-width:640px;margin:0 auto;padding:1.5rem 1rem 3rem}
+  .header{margin-bottom:1.5rem}
+  .header h1{font-size:20px;font-weight:600;color:var(--text)}
+  .header .sub{font-size:12px;color:var(--text3);margin-top:4px}
+  .sync-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:3px 10px;border-radius:20px;background:#E1F5EE;color:#085041;font-weight:500;margin-top:8px}
+  .sync-badge.syncing{background:#FAEEDA;color:#633806}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
+  .stat{background:var(--bg2);border-radius:var(--radius);padding:10px 12px}
+  .stat-label{font-size:11px;color:var(--text2);margin-bottom:3px}
+  .stat-num{font-size:20px;font-weight:600;color:var(--text)}
+  .stat-sub{font-size:10px;color:var(--text3);margin-top:1px}
+  .tabs{display:flex;gap:4px;background:var(--bg2);border-radius:var(--radius);padding:4px;margin-bottom:1.25rem}
+  .tab{flex:1;padding:8px 8px;font-size:13px;border:none;background:transparent;cursor:pointer;border-radius:6px;color:var(--text2);font-family:var(--font)}
+  .tab.active{background:var(--bg);color:var(--text);border:0.5px solid var(--border);font-weight:600}
+  .view{display:none}
+  .view.active{display:block}
+  .filter-bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+  .filter-btn{padding:4px 12px;font-size:12px;border:0.5px solid var(--border);border-radius:20px;background:transparent;cursor:pointer;font-family:var(--font);color:var(--text2)}
+  .filter-btn.active{background:var(--text);color:var(--bg);border-color:var(--text)}
+  .schedule-list{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
+  .sitem{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;display:grid;grid-template-columns:58px 1fr auto;gap:12px;align-items:center}
+  .sitem:hover{border-color:var(--border2)}
+  .date-box{text-align:center}
+  .date-box .day{font-size:22px;font-weight:700;color:var(--text);line-height:1}
+  .date-box .month{font-size:10px;color:var(--text2);margin-top:2px}
+  .date-box .dow{font-size:10px;color:var(--text3)}
+  .item-main .company{font-size:15px;font-weight:600;color:var(--text)}
+  .item-main .role{font-size:12px;color:var(--text2);margin-top:3px}
+  .item-main .meta{font-size:11px;color:var(--text3);margin-top:3px}
+  .item-right{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:500;white-space:nowrap}
+  .badge.interview{background:#E6F1FB;color:#185FA5}
+  .badge.study{background:#EAF3DE;color:#3B6D11}
+  .badge.consult{background:#FAEEDA;color:#854F0B}
+  .badge.test{background:#EEEDFE;color:#3C3489}
+  .badge.etc{background:var(--bg2);color:var(--text2)}
+  .today-badge{font-size:9px;padding:2px 6px;border-radius:8px;background:#E24B4A;color:white;margin-left:5px;vertical-align:middle}
+  .del-btn{background:transparent;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:4px;font-size:16px}
+  .del-btn:hover{color:#E24B4A;background:#FCEBEB}
+  .add-panel{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem}
+  .ig{margin-bottom:12px}
+  .ig label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px}
+  .ig input,.ig select,.ig textarea{
+    width:100%;font-family:var(--font);font-size:13px;
+    background:var(--bg);color:var(--text);
+    border:0.5px solid var(--border);border-radius:var(--radius);
+    padding:8px 10px;outline:none;
+  }
+  .ig input:focus,.ig select:focus,.ig textarea:focus{border-color:var(--border2)}
+  .ig textarea{min-height:70px;resize:vertical}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn-p{background:var(--text);color:var(--bg);border:none;border-radius:var(--radius);padding:11px 18px;font-size:13px;cursor:pointer;font-family:var(--font);font-weight:600;width:100%}
+  .btn-p:hover{opacity:.85}
+  .btn-s{background:transparent;color:var(--text);border:0.5px solid var(--border2);border-radius:var(--radius);padding:11px 16px;font-size:13px;cursor:pointer;font-family:var(--font)}
+  .btn-s:hover{background:var(--bg2)}
+  .btn-row{display:flex;gap:8px;margin-top:4px}
+  .ai-zone{border:1.5px dashed var(--border2);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;cursor:pointer;margin-bottom:10px;transition:border-color .15s}
+  .ai-zone:hover{border-color:var(--text3)}
+  .ai-zone.dragover{background:var(--bg2)}
+  .ai-zone i{font-size:28px;color:var(--text2);margin-bottom:8px;display:block}
+  .ai-zone p{font-size:13px;color:var(--text2);margin-bottom:4px}
+  .ai-zone span{font-size:11px;color:var(--text3)}
+  .or-div{text-align:center;font-size:12px;color:var(--text3);margin:10px 0;position:relative}
+  .or-div::before{content:'';position:absolute;top:50%;left:0;right:0;height:.5px;background:var(--border)}
+  .or-div span{background:var(--bg);padding:0 12px;position:relative}
+  .ai-result{background:var(--bg2);border-radius:var(--radius);padding:12px;margin-bottom:12px;display:none}
+  .ai-label{font-size:11px;color:var(--text2);margin-bottom:6px;font-weight:600}
+  .ai-field{display:flex;justify-content:space-between;font-size:12px;padding:3px 0}
+  .ai-field span:first-child{color:var(--text2)}
+  .ai-field span:last-child{color:var(--text);font-weight:500}
+  .loading-bar{height:3px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:10px;display:none}
+  .loading-bar-inner{height:100%;width:0;background:var(--text);border-radius:2px}
+  @keyframes lbar{0%{width:0}60%{width:75%}95%{width:90%}100%{width:100%}}
+  .sec-title{font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+  .empty-state{text-align:center;padding:2.5rem 1rem;color:var(--text2);font-size:14px}
+  .empty-state i{font-size:32px;display:block;margin-bottom:10px;color:var(--text3)}
+  #fileInput{display:none}
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+  .cal-nav-btn{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius);padding:6px 12px;cursor:pointer;font-family:var(--font);color:var(--text);font-size:13px}
+  .cal-nav-btn:hover{background:var(--bg2)}
+  .cal-title{font-size:15px;font-weight:600;color:var(--text)}
+  .cal-header{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:6px}
+  .cal-dow{font-size:11px;color:var(--text2);text-align:center;padding:4px 0;font-weight:500}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+  .cal-day{border-radius:var(--radius);padding:6px 4px;min-height:60px;background:var(--bg);border:0.5px solid var(--border)}
+  .cal-day.other-month{opacity:.3}
+  .cal-day.today{border-color:var(--text);border-width:1.5px}
+  .cal-day-num{font-size:11px;font-weight:600;color:var(--text);margin-bottom:3px}
+  .cal-dot{font-size:9px;border-radius:3px;padding:1px 4px;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .cal-dot.interview{background:#E6F1FB;color:#185FA5}
+  .cal-dot.study{background:#EAF3DE;color:#3B6D11}
+  .cal-dot.consult{background:#FAEEDA;color:#854F0B}
+  .cal-dot.test{background:#EEEDFE;color:#3C3489}
+  .cal-dot.etc{background:var(--bg2);color:var(--text2)}
+  .divider{border:none;border-top:0.5px solid var(--border);margin:14px 0}
+  @media(max-width:480px){
+    .stats{grid-template-columns:repeat(2,1fr)}
+    .frow{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1><i class="ti ti-briefcase" style="margin-right:6px;font-size:18px;vertical-align:-3px"></i>지상이의 채용 일정</h1>
+    <div class="sub">응경이가 만들어준 일정표</div>
+    <span class="sync-badge" id="syncBadge"><i class="ti ti-circle-check" style="font-size:13px"></i> 실시간 공유중</span>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">전체</div><div class="stat-num" id="statTotal">0</div><div class="stat-sub">건</div></div>
+    <div class="stat"><div class="stat-label">면접</div><div class="stat-num" id="statInterview">0</div><div class="stat-sub">건</div></div>
+    <div class="stat"><div class="stat-label">이번주</div><div class="stat-num" id="statWeek">0</div><div class="stat-sub">건</div></div>
+    <div class="stat"><div class="stat-label">D-day</div><div class="stat-num" id="statDday" style="font-size:15px">-</div><div class="stat-sub" id="statDdayLabel">다음 일정</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" id="tab-list" onclick="switchTab('list',this)"><i class="ti ti-list"></i> 목록</button>
+    <button class="tab" id="tab-calendar" onclick="switchTab('calendar',this)"><i class="ti ti-calendar"></i> 캘린더</button>
+    <button class="tab" id="tab-add" onclick="switchTab('add',this)"><i class="ti ti-plus"></i> 추가</button>
+  </div>
+
+  <div id="view-list" class="view active">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="setFilter('all',this)">전체</button>
+      <button class="filter-btn" onclick="setFilter('interview',this)">면접</button>
+      <button class="filter-btn" onclick="setFilter('study',this)">스터디</button>
+      <button class="filter-btn" onclick="setFilter('consult',this)">컨설팅</button>
+      <button class="filter-btn" onclick="setFilter('test',this)">필기/과제</button>
+    </div>
+    <div class="schedule-list" id="scheduleList"></div>
+  </div>
+
+  <div id="view-calendar" class="view">
+    <div class="cal-nav">
+      <button class="cal-nav-btn" onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
+      <span class="cal-title" id="calTitle"></span>
+      <button class="cal-nav-btn" onclick="changeMonth(1)"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div class="cal-header">
+      <div class="cal-dow">일</div><div class="cal-dow">월</div><div class="cal-dow">화</div>
+      <div class="cal-dow">수</div><div class="cal-dow">목</div><div class="cal-dow">금</div><div class="cal-dow">토</div>
+    </div>
+    <div class="cal-grid" id="calGrid"></div>
+  </div>
+
+  <div id="view-add" class="view">
+    <div class="add-panel">
+      <div class="sec-title">AI 자동 입력</div>
+      <div class="ai-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+        <i class="ti ti-photo-up"></i>
+        <p>이미지 캡쳐 드래그 또는 클릭 업로드</p>
+        <span>카카오톡 · 문자 · 이메일 캡쳐 모두 OK</span>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" onchange="handleImg(event)">
+      <div class="or-div"><span>또는</span></div>
+      <div class="ig">
+        <label>문자 / 카카오 내용 붙여넣기</label>
+        <textarea id="pasteText" placeholder="안녕하세요, OO기업 인사팀입니다. 5월 15일 오후 2시 1차 면접..."></textarea>
+      </div>
+      <button class="btn-s" style="width:100%;margin-bottom:10px" onclick="parseText()">
+        <i class="ti ti-sparkles" style="margin-right:4px"></i> AI로 일정 파싱하기
+      </button>
+      <div class="loading-bar" id="loadingBar"><div class="loading-bar-inner" id="loadingInner"></div></div>
+      <div class="ai-result" id="aiResult">
+        <div class="ai-label"><i class="ti ti-sparkles"></i> AI가 파악한 정보</div>
+        <div id="aiFields"></div>
+      </div>
+
+      <hr class="divider">
+      <div class="sec-title">직접 입력 / 수정</div>
+      <div class="frow">
+        <div class="ig"><label>기업명</label><input type="text" id="fCompany" placeholder="(주)OO기업"></div>
+        <div class="ig"><label>구분</label><select id="fType"><option value="interview">면접</option><option value="study">면접스터디</option><option value="consult">컨설팅</option><option value="test">필기/과제</option><option value="etc">기타</option></select></div>
+      </div>
+      <div class="frow">
+        <div class="ig"><label>날짜</label><input type="date" id="fDate"></div>
+        <div class="ig"><label>시간</label><input type="time" id="fTime"></div>
+      </div>
+      <div class="ig"><label>역할 / 포지션</label><input type="text" id="fRole" placeholder="기획직 신입, 인턴 등"></div>
+      <div class="ig"><label>장소 / 방식</label><input type="text" id="fLocation" placeholder="본사 4층, 화상면접 등"></div>
+      <div class="ig"><label>메모</label><textarea id="fMemo" style="min-height:54px" placeholder="준비사항, 담당자 등"></textarea></div>
+      <div class="btn-row">
+        <button class="btn-p" onclick="addSchedule()"><i class="ti ti-calendar-plus" style="margin-right:4px"></i> 일정 추가</button>
+        <button class="btn-s" onclick="clearForm()">초기화</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DAYS=['일','월','화','수','목','금','토'];
+const TYPE_LABEL={interview:'면접',study:'면접스터디',consult:'컨설팅',test:'필기/과제',etc:'기타'};
+const STORAGE_KEY='jisang-schedules-v1';
+let schedules=[];
+let currentFilter='all';
+let calYear,calMonth;
+const now=new Date();
+calYear=now.getFullYear();calMonth=now.getMonth();
+
+function loadSchedules(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    schedules=raw?JSON.parse(raw):[];
+  }catch(e){schedules=[];}
+  renderList();updateStats();
+}
+
+function saveSchedules(){
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(schedules));}catch(e){}
+}
+
+function setSyncing(s){
+  const b=document.getElementById('syncBadge');
+  if(s){b.className='sync-badge syncing';b.innerHTML='<i class="ti ti-refresh" style="font-size:13px"></i> 저장 중';}
+  else{b.className='sync-badge';b.innerHTML='<i class="ti ti-circle-check" style="font-size:13px"></i> 저장됨';}
+}
+
+function updateStats(){
+  const today=new Date();today.setHours(0,0,0,0);
+  const weekEnd=new Date(today);weekEnd.setDate(today.getDate()+7);
+  document.getElementById('statTotal').textContent=schedules.length;
+  document.getElementById('statInterview').textContent=schedules.filter(s=>s.type==='interview').length;
+  document.getElementById('statWeek').textContent=schedules.filter(s=>{const d=new Date(s.date);return d>=today&&d<=weekEnd;}).length;
+  const upcoming=schedules.filter(s=>new Date(s.date)>=today).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(upcoming.length){
+    const diff=Math.round((new Date(upcoming[0].date)-today)/86400000);
+    document.getElementById('statDday').textContent=diff===0?'D-0':`D-${diff}`;
+    document.getElementById('statDdayLabel').textContent=upcoming[0].company||'다음 일정';
+  }else{
+    document.getElementById('statDday').textContent='-';
+    document.getElementById('statDdayLabel').textContent='없음';
+  }
+}
+
+function renderList(){
+  const el=document.getElementById('scheduleList');
+  const today=new Date();today.setHours(0,0,0,0);
+  let filtered=schedules.filter(s=>currentFilter==='all'||s.type===currentFilter);
+  const upcoming=filtered.filter(s=>new Date(s.date)>=today).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const past=filtered.filter(s=>new Date(s.date)<today).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const sorted=[...upcoming,...past];
+  if(!sorted.length){
+    el.innerHTML='<div class="empty-state"><i class="ti ti-calendar-off"></i>아직 일정이 없어요!<br><span style="font-size:12px;color:var(--text3)">추가 탭에서 일정을 넣어보세요</span></div>';
+    return;
+  }
+  el.innerHTML=sorted.map(s=>{
+    const d=new Date(s.date);
+    const isToday=d.toDateString()===now.toDateString();
+    const isPast=d<today;
+    const idx=schedules.indexOf(s);
+    return`<div class="sitem" style="${isPast?'opacity:.5':''}">
+      <div class="date-box">
+        <div class="day">${d.getDate()}</div>
+        <div class="month">${d.getMonth()+1}월</div>
+        <div class="dow">${DAYS[d.getDay()]}요일</div>
+      </div>
+      <div class="item-main">
+        <div class="company">${escHtml(s.company||TYPE_LABEL[s.type])}${isToday?'<span class="today-badge">TODAY</span>':''}</div>
+        <div class="role">${escHtml(s.role||TYPE_LABEL[s.type])}</div>
+        <div class="meta"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px;margin-right:2px"></i>${escHtml(s.time||'시간 미정')}${s.location?' · '+escHtml(s.location):''}</div>
+      </div>
+      <div class="item-right">
+        <span class="badge ${s.type}">${TYPE_LABEL[s.type]}</span>
+        <button class="del-btn" onclick="deleteSchedule(${idx})" title="삭제"><i class="ti ti-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function deleteSchedule(idx){
+  if(!confirm('이 일정을 삭제할까요?'))return;
+  schedules.splice(idx,1);
+  saveSchedules();renderList();updateStats();
+}
+
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderList();
+}
+
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('view-'+tab).classList.add('active');
+  if(tab==='calendar')renderCalendar();
+}
+
+function renderCalendar(){
+  document.getElementById('calTitle').textContent=`${calYear}년 ${calMonth+1}월`;
+  const grid=document.getElementById('calGrid');
+  const firstDay=new Date(calYear,calMonth,1).getDay();
+  const daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  const daysInPrev=new Date(calYear,calMonth,0).getDate();
+  let html='';
+  for(let i=0;i<42;i++){
+    let day,month,year,isOther=false;
+    if(i<firstDay){day=daysInPrev-firstDay+i+1;month=calMonth-1;year=calYear;isOther=true;}
+    else if(i>=firstDay+daysInMonth){day=i-firstDay-daysInMonth+1;month=calMonth+1;year=calYear;isOther=true;}
+    else{day=i-firstDay+1;month=calMonth;year=calYear;}
+    const dateStr=`${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    const todayStr=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+    const evs=schedules.filter(s=>s.date===dateStr);
+    html+=`<div class="cal-day${isOther?' other-month':''}${dateStr===todayStr?' today':''}">
+      <div class="cal-day-num">${day}</div>
+      ${evs.map(e=>`<div class="cal-dot ${e.type}">${escHtml(e.company||TYPE_LABEL[e.type])}</div>`).join('')}
+    </div>`;
+  }
+  grid.innerHTML=html;
+}
+
+function changeMonth(d){calMonth+=d;if(calMonth>11){calMonth=0;calYear++;}if(calMonth<0){calMonth=11;calYear--;}renderCalendar();}
+
+const dz=document.getElementById('dropZone');
+dz.addEventListener('dragover',e=>{e.preventDefault();dz.classList.add('dragover');});
+dz.addEventListener('dragleave',()=>dz.classList.remove('dragover'));
+dz.addEventListener('drop',e=>{e.preventDefault();dz.classList.remove('dragover');const f=e.dataTransfer.files[0];if(f)processImage(f);});
+function handleImg(e){const f=e.target.files[0];if(f)processImage(f);}
+
+function processImage(file){
+  const reader=new FileReader();
+  reader.onload=async e=>{
+    const b64=e.target.result.split(',')[1];
+    showLoading();
+    try{
+      const res=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:file.type,data:b64}},
+          {type:'text',text:`이미지에서 채용/면접 관련 일정 정보를 추출해줘. 반드시 JSON만 반환. 형식: {"company":"기업명","type":"interview|study|consult|test|etc","date":"YYYY-MM-DD","time":"HH:MM","role":"직무","location":"장소","memo":"메모"}. 없는 필드는 빈 문자열.`}
+        ]}]})
+      });
+      const data=await res.json();
+      if(data.error){throw new Error(data.error.message);}
+      const txt=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+      parseAIResult(txt);
+    }catch(err){hideLoading();alert('파싱 오류: '+err.message);}
+  };
+  reader.readAsDataURL(file);
+}
+
+async function parseText(){
+  const text=document.getElementById('pasteText').value.trim();
+  if(!text){alert('텍스트를 붙여넣어 주세요.');return;}
+  showLoading();
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getApiKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,messages:[{role:'user',content:`다음 텍스트에서 채용 일정 정보를 추출해줘. 반드시 JSON만 반환. 형식: {"company":"기업명","type":"interview|study|consult|test|etc","date":"YYYY-MM-DD","time":"HH:MM","role":"직무","location":"장소","memo":"메모"}. 날짜가 상대적이면 오늘(${new Date().toISOString().split('T')[0]}) 기준 계산. 없는 필드는 빈 문자열.\n\n텍스트:\n${text}`}]})
+    });
+    const data=await res.json();
+    if(data.error){throw new Error(data.error.message);}
+    const txt=data.content.filter(c=>c.type==='text').map(c=>c.text).join('');
+    parseAIResult(txt);
+  }catch(err){hideLoading();alert('파싱 오류: '+err.message);}
+}
+
+function getApiKey(){
+  let key=localStorage.getItem('anthropic-api-key');
+  if(!key){
+    key=prompt('Anthropic API 키를 입력해주세요:\n(sk-ant-... 형식, 한 번만 입력하면 저장됩니다)');
+    if(key)localStorage.setItem('anthropic-api-key',key.trim());
+  }
+  return key||'';
+}
+
+function parseAIResult(text){
+  hideLoading();
+  try{
+    const parsed=JSON.parse(text.replace(/```json|```/g,'').trim());
+    if(parsed.company)document.getElementById('fCompany').value=parsed.company;
+    if(parsed.type)document.getElementById('fType').value=parsed.type;
+    if(parsed.date)document.getElementById('fDate').value=parsed.date;
+    if(parsed.time)document.getElementById('fTime').value=parsed.time;
+    if(parsed.role)document.getElementById('fRole').value=parsed.role;
+    if(parsed.location)document.getElementById('fLocation').value=parsed.location;
+    if(parsed.memo)document.getElementById('fMemo').value=parsed.memo;
+    const el=document.getElementById('aiResult');el.style.display='block';
+    const fields=[['기업',parsed.company],['구분',TYPE_LABEL[parsed.type]||parsed.type],['날짜',parsed.date],['시간',parsed.time],['포지션',parsed.role],['장소',parsed.location]].filter(([,v])=>v);
+    document.getElementById('aiFields').innerHTML=fields.map(([k,v])=>`<div class="ai-field"><span>${k}</span><span>${escHtml(v)}</span></div>`).join('');
+  }catch(e){alert('정보를 파악하지 못했어요. 직접 입력해 주세요.');}
+}
+
+function showLoading(){
+  const b=document.getElementById('loadingBar'),i=document.getElementById('loadingInner');
+  b.style.display='block';i.style.animation='none';void i.offsetWidth;i.style.animation='lbar 2.5s ease forwards';
+}
+function hideLoading(){document.getElementById('loadingBar').style.display='none';}
+
+async function addSchedule(){
+  const company=document.getElementById('fCompany').value.trim();
+  const date=document.getElementById('fDate').value;
+  if(!company){alert('기업명을 입력해 주세요.');return;}
+  if(!date){alert('날짜를 입력해 주세요.');return;}
+  schedules.push({
+    company,type:document.getElementById('fType').value,date,
+    time:document.getElementById('fTime').value,
+    role:document.getElementById('fRole').value.trim(),
+    location:document.getElementById('fLocation').value.trim(),
+    memo:document.getElementById('fMemo').value.trim(),
+    id:Date.now()
+  });
+  setSyncing(true);
+  saveSchedules();
+  setTimeout(()=>setSyncing(false),600);
+  clearForm();
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('tab-list').classList.add('active');
+  document.getElementById('view-list').classList.add('active');
+  renderList();updateStats();
+}
+
+function clearForm(){
+  ['fCompany','fDate','fTime','fRole','fLocation','fMemo'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fType').value='interview';
+  document.getElementById('aiResult').style.display='none';
+  document.getElementById('pasteText').value='';
+  document.getElementById('fileInput').value='';
+}
+
+loadSchedules();
+</script>
+</body>
+</html>
